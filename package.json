@@ -1,0 +1,37 @@
+{
+  "name": "headless-pagination",
+  "version": "1.0.1",
+  "description": "Headless pagination logic for JavaScript and TypeScript",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "pagination",
+    "vanilla-js",
+    "typescript",
+    "headless",
+    "ui-agnostic"
+  ],
+  "author": "sulenchy",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.16",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.16"
+  }
+}
