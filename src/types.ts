@@ -1,13 +1,20 @@
-export type PaginationItem = number | "ellipsis";
+export type PaginationItem = "ellipsis" | number;
 
-export interface PaginationConfig {
+/**
+ * Configuration options for the createPagination function.
+ */
+export interface PaginationOptions {
   totalItems: number;
   itemsPerPage: number;
-  currentPage: number;
+  initialPage?: number;
   siblingCount?: number;
+  onStateChange: (state: PaginationState) => void;
 }
 
-export interface PaginationResult {
+/**
+ * The state of the pagination. This object is passed to the onStateChange callback.
+ */
+export interface PaginationState {
   pages: PaginationItem[];
   currentPage: number;
   totalPages: number;
@@ -15,4 +22,14 @@ export interface PaginationResult {
   hasPrevious: boolean;
   nextPage: number | null;
   previousPage: number | null;
+}
+
+/**
+ * The return value of the createPagination function.
+ */
+export interface Pagination {
+  initialState: PaginationState;
+  goToPage: (page: number) => void;
+  nextPage: () => void;
+  previousPage: () => void;
 }
