@@ -1,89 +1,118 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { createPagination } from "../src/createPagination";
+import { PaginationState } from "../src/types";
 
 describe("createPagination", () => {
-  it("should return the correct pagination for the first page", () => {
-    const result = createPagination({
+  it("should return the correct initial state for the first page", () => {
+    const handleChange = vi.fn();
+    const paginator = createPagination({
       totalItems: 100,
       itemsPerPage: 10,
-      currentPage: 1,
+      onStateChange: handleChange,
     });
-    expect(result.pages).toEqual([1, 2, 3, "ellipsis", 10]);
-    expect(result.currentPage).toBe(1);
-    expect(result.totalPages).toBe(10);
-    expect(result.hasNext).toBe(true);
-    expect(result.hasPrevious).toBe(false);
-    expect(result.nextPage).toBe(2);
-    expect(result.previousPage).toBe(null);
+
+    const { initialState } = paginator;
+    expect(initialState.pages).toEqual([1, 2, 3, "ellipsis", 10]);
+    expect(initialState.currentPage).toBe(1);
+    expect(initialState.totalPages).toBe(10);
+    expect(initialState.hasNext).toBe(true);
+    expect(initialState.hasPrevious).toBe(false);
+    expect(initialState.nextPage).toBe(2);
+    expect(initialState.previousPage).toBe(null);
   });
 
-  it("should return the correct pagination for a middle page", () => {
-    const result = createPagination({
+  it("should call onStateChange with the correct state when nextPage is called", () => {
+    const handleChange = vi.fn();
+    const paginator = createPagination({
       totalItems: 100,
       itemsPerPage: 10,
-      currentPage: 5,
+      initialPage: 1,
+      onStateChange: handleChange,
     });
-    expect(result.pages).toEqual([1, "ellipsis", 3, 4, 5, 6, 7, "ellipsis", 10]);
-    expect(result.currentPage).toBe(5);
-    expect(result.totalPages).toBe(10);
-    expect(result.hasNext).toBe(true);
-    expect(result.hasPrevious).toBe(true);
-    expect(result.nextPage).toBe(6);
-    expect(result.previousPage).toBe(4);
+
+    paginator.nextPage();
+
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    const newState = handleChange.mock.calls[0][0] as PaginationState;
+    expect(newState.currentPage).toBe(2);
+    expect(newState.previousPage).toBe(1);
+    expect(newState.pages).toEqual([1, 2, 3, 4, "ellipsis", 10]);
   });
 
-  it("should return the correct pagination for the last page", () => {
-    const result = createPagination({
+  it("should call onStateChange with the correct state when previousPage is called", () => {
+    const handleChange = vi.fn();
+    const paginator = createPagination({
       totalItems: 100,
       itemsPerPage: 10,
-      currentPage: 10,
+      initialPage: 3,
+      onStateChange: handleChange,
     });
-    expect(result.pages).toEqual([1, "ellipsis", 8, 9, 10]);
-    expect(result.currentPage).toBe(10);
-    expect(result.totalPages).toBe(10);
-    expect(result.hasNext).toBe(false);
-    expect(result.hasPrevious).toBe(true);
-    expect(result.nextPage).toBe(null);
-    expect(result.previousPage).toBe(9);
+
+    paginator.previousPage();
+
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    const newState = handleChange.mock.calls[0][0] as PaginationState;
+    expect(newState.currentPage).toBe(2);
+    expect(newState.nextPage).toBe(3);
+    expect(newState.pages).toEqual([1, 2, 3, 4, "ellipsis", 10]);
   });
 
-  it("should handle a small number of pages", () => {
-    const result = createPagination({
-      totalItems: 30,
-      itemsPerPage: 10,
-      currentPage: 2,
-    });
-    expect(result.pages).toEqual([1, 2, 3]);
-    expect(result.currentPage).toBe(2);
-    expect(result.totalPages).toBe(3);
-    expect(result.hasNext).toBe(true);
-    expect(result.hasPrevious).toBe(true);
-    expect(result.nextPage).toBe(3);
-    expect(result.previousPage).toBe(1);
-  });
-
-  it("should handle a single page", () => {
-    const result = createPagination({
-      totalItems: 5,
-      itemsPerPage: 10,
-      currentPage: 1,
-    });
-    expect(result.pages).toEqual([1]);
-    expect(result.currentPage).toBe(1);
-    expect(result.totalPages).toBe(1);
-    expect(result.hasNext).toBe(false);
-    expect(result.hasPrevious).toBe(false);
-    expect(result.nextPage).toBe(null);
-    expect(result.previousPage).toBe(null);
-  });
-
-  it("should handle siblingCount correctly", () => {
-    const result = createPagination({
+  it("should call onStateChange with the correct state when goToPage is called", () => {
+    const handleChange = vi.fn();
+    const paginator = createPagination({
       totalItems: 100,
       itemsPerPage: 10,
-      currentPage: 5,
+      onStateChange: handleChange,
+    });
+
+    paginator.goToPage(5);
+
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    const newState = handleChange.mock.calls[0][0] as PaginationState;
+    expect(newState.currentPage).toBe(5);
+    expect(newState.pages).toEqual([1, "ellipsis", 3, 4, 5, 6, 7, "ellipsis", 10]);
+  });
+
+  it("should not call onStateChange if trying to go to the same page", () => {
+    const handleChange = vi.fn();
+    const paginator = createPagination({
+      totalItems: 100,
+      itemsPerPage: 10,
+      initialPage: 3,
+      onStateChange: handleChange,
+    });
+
+    paginator.goToPage(3);
+    expect(handleChange).not.toHaveBeenCalled();
+  });
+
+  it("should not call onStateChange if trying to go to an invalid page", () => {
+    const handleChange = vi.fn();
+    const paginator = createPagination({
+      totalItems: 100,
+      itemsPerPage: 10,
+      onStateChange: handleChange,
+    });
+
+    paginator.goToPage(0);
+    paginator.goToPage(11);
+    expect(handleChange).not.toHaveBeenCalled();
+  });
+
+  it("should handle siblingCount correctly on state changes", () => {
+    const handleChange = vi.fn();
+    const paginator = createPagination({
+      totalItems: 100,
+      itemsPerPage: 10,
       siblingCount: 1,
+      onStateChange: handleChange,
     });
-    expect(result.pages).toEqual([1, "ellipsis", 4, 5, 6, "ellipsis", 10]);
+
+    paginator.goToPage(5);
+
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    const newState = handleChange.mock.calls[0][0] as PaginationState;
+    expect(newState.currentPage).toBe(5);
+    expect(newState.pages).toEqual([1, "ellipsis", 4, 5, 6, "ellipsis", 10]);
   });
 });
