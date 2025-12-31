@@ -56,12 +56,12 @@ function handleStateChange(state) {
   currentPageSpan.textContent = state.currentPage;
 
   // Disable/enable buttons
-  prevButton.disabled = state.isFirstPage;
-  nextButton.disabled = state.isLastPage;
+  prevButton.disabled = !state.hasPrevious;
+  nextButton.disabled = !state.hasNext;
 
   // Render page numbers
   pagesContainer.innerHTML = '';
-  state.pageNumbers.forEach(page => {
+  state.pages.forEach(page => {
     if (page === '...') {
       const span = document.createElement('span');
       span.textContent = '...';
@@ -83,8 +83,8 @@ function handleStateChange(state) {
 
 // 2. Initialize the paginator
 const paginator = createPagination({
-  total: 200,       // Total number of items
-  pageSize: 10,     // Items per page
+  totalItems: 200,       // Total number of items
+  itemsPerPage: 10,     // Items per page
   initialPage: 1,   // (Optional) Initial page
   onStateChange: handleStateChange,
 });
@@ -95,6 +95,224 @@ nextButton.addEventListener('click', paginator.nextPage);
 
 // Trigger the initial render with the starting state
 handleStateChange(paginator.initialState);
+```
+
+## React Usage Example
+
+Here is how you can use `pagination-core` in a React component with hooks.
+
+```jsx
+import React, { useState, useMemo } from 'react';
+import { createPagination, PaginationState } from 'pagination-core';
+
+// Assuming `allItems` is an array of objects you want to paginate
+// const allItems = Array.from({ length: 100 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
+
+const PaginatedList = ({ allItems }) => {
+  // The paginator instance is memoized to prevent re-creation on every render.
+  const paginator = useMemo(() => {
+    return createPagination({
+      totalItems: allItems.length,
+      itemsPerPage: 10,
+      onStateChange: (state) => {
+        // The callback updates the component's state.
+        setPaginationState(state);
+      },
+    });
+  }, [allItems.length]);
+
+  // Initialize the component's state with the paginator's initial state.
+  const [paginationState, setPaginationState] = useState(paginator.initialState);
+
+  const {
+    currentPage,
+    pages,
+    hasNext,
+    hasPrevious,
+    startIndex,
+    endIndex,
+  } = paginationState;
+
+  // Get the slice of items for the current page.
+  const currentItems = allItems.slice(startIndex, endIndex + 1);
+
+  return (
+    <div>
+      <h3>Page {currentPage}</h3>
+      <ul>
+        {currentItems.map(item => (
+          <li key={item.id}>{item.name}</li>
+        ))}
+      </ul>
+
+      <nav style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <button onClick={paginator.previousPage} disabled={!hasPrevious}>
+          &larr; Previous
+        </button>
+
+        {pages.map((page, index) =>
+          page === 'ellipsis' ? (
+            <span key={index}>...</span>
+          ) : (
+            <button
+              key={index}
+              onClick={() => paginator.goToPage(page)}
+              style={{ fontWeight: page === currentPage ? 'bold' : 'normal' }}
+            >
+              {page}
+            </button>
+          )
+        )}
+
+        <button onClick={paginator.nextPage} disabled={!hasNext}>
+          Next &rarr;
+        </button>
+      </nav>
+    </div>
+  );
+};
+```
+
+## Vue.js Usage Example
+
+Here is a complete example using Vue 3's Composition API (`<script setup>`).
+
+```vue
+<script setup>
+import { ref, computed } from 'vue';
+import { createPagination } from 'pagination-core';
+
+// Accept all items as a prop
+const props = defineProps({
+  allItems: {
+    type: Array,
+    required: true,
+  },
+});
+
+// This will hold the current state provided by the paginator
+const paginationState = ref(null);
+
+// The paginator instance is created once when the component is set up.
+const paginator = createPagination({
+  totalItems: props.allItems.length,
+  itemsPerPage: 10,
+  onStateChange: (newState) => {
+    paginationState.value = newState;
+  },
+});
+
+// Set the initial state for the first render.
+paginationState.value = paginator.initialState;
+
+// A computed property to automatically get the items for the current page.
+// It will re-calculate whenever paginationState changes.
+const currentItems = computed(() => {
+  if (!paginationState.value) return [];
+  const { startIndex, endIndex } = paginationState.value;
+  return props.allItems.slice(startIndex, endIndex + 1);
+});
+</script>
+
+<template>
+  <div v-if="paginationState">
+    <h3>Page {{ paginationState.currentPage }}</h3>
+    <ul>
+      <li v-for="item in currentItems" :key="item.id">{{ item.name }}</li>
+    </ul>
+
+    <nav style="display: flex; gap: 8px; align-items: center;">
+      <button @click="paginator.previousPage" :disabled="!paginationState.hasPrevious">
+        &larr; Previous
+      </button>
+
+      <template v-for="(page, index) in paginationState.pages">
+        <span v-if="page === 'ellipsis'" :key="`ellipsis-${index}`">...</span>
+        <button
+          v-else
+          :key="page"
+          @click="paginator.goToPage(page)"
+          :style="{ fontWeight: page === paginationState.currentPage ? 'bold' : 'normal' }"
+        >
+          {{ page }}
+        </button>
+      </template>
+
+      <button @click="paginator.nextPage" :disabled="!paginationState.hasNext">
+        Next &rarr;
+      </button>
+    </nav>
+  </div>
+</template>
+```
+
+## Svelte Usage Example
+
+Here is a complete example for a Svelte component.
+
+```svelte
+<script>
+  import { createPagination } from 'pagination-core';
+
+  // Accept allItems as a prop
+  export let allItems = [];
+
+  let paginationState;
+
+  // The paginator instance is created once when the component initializes.
+  const paginator = createPagination({
+    totalItems: allItems.length,
+    itemsPerPage: 10,
+    onStateChange: (newState) => {
+      // In Svelte, reactivity is triggered by assignment.
+      paginationState = newState;
+    },
+  });
+
+  // Set the initial state for the first render.
+  paginationState = paginator.initialState;
+
+  // Create a "derived" value for currentItems.
+  // This block will re-run automatically whenever paginationState changes.
+  $: currentItems = allItems.slice(
+    paginationState.startIndex,
+    paginationState.endIndex + 1
+  );
+</script>
+
+{#if paginationState}
+  <div>
+    <h3>Page {paginationState.currentPage}</h3>
+    <ul>
+      {#each currentItems as item (item.id)}
+        <li>{item.name}</li>
+      {/each}
+    </ul>
+
+    <nav style="display: flex; gap: 8px; align-items: center;">
+      <button on:click={paginator.previousPage} disabled={!paginationState.hasPrevious}>
+        &larr; Previous
+      </button>
+
+      {#each paginationState.pages as page}
+        {#if page === 'ellipsis'}
+          <span>...</span>
+        {:else}
+          <button
+            on:click={() => paginator.goToPage(page)}
+            style:font-weight={page === paginationState.currentPage ? 'bold' : 'normal'}
+          >
+            {page}
+          </button>
+        {/if}
+      {/each}
+
+      <button on:click={paginator.nextPage} disabled={!paginationState.hasNext}>
+        Next &rarr;
+      </button>
+    </nav>
+  </div>
+{/if}
 ```
 
 ## API Reference
