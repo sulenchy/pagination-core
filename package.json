@@ -1,7 +1,7 @@
 {
-  "name": "headless-pagination",
+  "name": "pagination-core",
   "version": "1.0.1",
-  "description": "Headless pagination logic for JavaScript and TypeScript",
+  "description": "Pagination core logic for JavaScript and TypeScript",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

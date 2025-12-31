@@ -8,7 +8,7 @@ describe("createPagination", () => {
       itemsPerPage: 10,
       currentPage: 1,
     });
-    expect(result.pages).toEqual([1, 2, 3, 4, 5, "ellipsis", 10]);
+    expect(result.pages).toEqual([1, 2, 3, "ellipsis", 10]);
     expect(result.currentPage).toBe(1);
     expect(result.totalPages).toBe(10);
     expect(result.hasNext).toBe(true);
@@ -23,7 +23,7 @@ describe("createPagination", () => {
       itemsPerPage: 10,
       currentPage: 5,
     });
-    expect(result.pages).toEqual([1, "ellipsis", 4, 5, 6, "ellipsis", 10]);
+    expect(result.pages).toEqual([1, "ellipsis", 3, 4, 5, 6, 7, "ellipsis", 10]);
     expect(result.currentPage).toBe(5);
     expect(result.totalPages).toBe(10);
     expect(result.hasNext).toBe(true);
@@ -38,7 +38,7 @@ describe("createPagination", () => {
       itemsPerPage: 10,
       currentPage: 10,
     });
-    expect(result.pages).toEqual([1, "ellipsis", 6, 7, 8, 9, 10]);
+    expect(result.pages).toEqual([1, "ellipsis", 8, 9, 10]);
     expect(result.currentPage).toBe(10);
     expect(result.totalPages).toBe(10);
     expect(result.hasNext).toBe(false);

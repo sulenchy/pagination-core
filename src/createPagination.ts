@@ -11,7 +11,7 @@ export function createPagination({
 
   const start = Math.max(2, currentPage - siblingCount);
   const end = Math.min(totalPages - 1, currentPage + siblingCount);
-
+  
   // First page
   pages.push(1);
 
