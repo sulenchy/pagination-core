@@ -19,6 +19,6 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
-    "pagination-core": "file:../../.."
+    "pagination-core": "^1.2.0"
   }
 }
