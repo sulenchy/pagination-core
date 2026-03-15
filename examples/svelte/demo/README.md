@@ -45,3 +45,30 @@ If you have state that's important to retain within a component, consider creati
 import { writable } from 'svelte/store'
 export default writable(0)
 ```
+
+## Svelte 5 Migration Notes
+
+If you encounter the `Uncaught Svelte error: component_api_invalid_new` error after migrating to Svelte 5, it means that a component is being instantiated using the Svelte 4 API (`new App(...)`) which is no longer valid in Svelte 5.
+
+To resolve this, you need to configure the Svelte compiler to use the Svelte 4 component API for compatibility. This can be done by adding the `compatibility.componentApi: 4` option to the `svelte` plugin in your `vite.config.ts` file.
+
+**Example `vite.config.ts` modification:**
+
+```typescript
+import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+import sveltePreprocess from 'svelte-preprocess'
+
+export default defineConfig({
+  plugins: [svelte({
+    preprocess: sveltePreprocess({ typescript: true }),
+    compilerOptions: {
+      compatibility: {
+        componentApi: 4,
+      },
+    },
+  })],
+})
+```
+
+This will allow your Svelte 4 components to continue working in a Svelte 5 environment.
