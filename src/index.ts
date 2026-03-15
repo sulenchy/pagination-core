@@ -1,2 +1,2 @@
-export { createPagination } from "./createPagination";
-export * from "./types";
+export { createPagination } from "./createPagination.js";
+export * from "./types.js";
