@@ -271,6 +271,15 @@ To run the Vue.js demo:
 3.  Start the development server: `npm run dev`
 4.  Open your browser to the address provided by Vite.
 
+### Server Demo (Node.js)
+
+This demo shows how to use `pagination-core` in a Node.js/Express backend to serve paginated data via a REST API.
+
+1.  Navigate to the demo directory: `cd examples/server/demo`
+2.  Install dependencies: `npm install`
+3.  Start the development server: `npm run start`
+4.  The server will be running at `http://localhost:3000`. You can test the API endpoint by visiting `http://localhost:3000/items?page=2` in your browser or API client.
+
 ## API Reference
 
 ### `createPagination(options)`
