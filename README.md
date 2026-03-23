@@ -69,6 +69,8 @@ console.log(state.pages); // [1, 2, 3, ..., 10]
 console.log(state.currentPage); // 1
 ```
 
+![Demo Image](/public/assets/Screenshot%202026-03-23%20at%2014.44.56.png "Demo Image")
+
 ## How It Works
 
 The library is built around a single function, `createPagination`.

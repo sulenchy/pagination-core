@@ -1,6 +1,6 @@
 {
   "name": "pagination-core",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Pagination core logic for JavaScript and TypeScript",
   "type": "module",
   "main": "./dist/index.js",
