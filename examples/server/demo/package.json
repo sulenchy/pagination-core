@@ -8,7 +8,7 @@
     "start": "tsx server.ts"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "express": "^4.22.2",
     "pagination-core": "^1.0.0"
   },
   "devDependencies": {
